@@ -7,7 +7,7 @@
 
 ## 🎨 Identidad Visual y Diseño de Marca: "Tu Tiendita IA"
 
-La interfaz gráfica de **OmniFlow FPS Booster** sigue las especificaciones de diseño oficiales de **Tu Tiendita IA** ([tutiendita-ia.store](https://tutiendita-ia.store)), el portal referente en herramientas de Inteligencia Artificial para creadores digitales.
+La interfaz gráfica de **OmniFlow FPS Booster** sigue las especificaciones de diseño oficiales de la suite creativa de **Tu Tiendita IA** ([tutiendita-ia.store](https://tutiendita-ia.store)).
 
 Implementa el sistema estético **"Noche Tinta Studio"**:
 - **Azul Birome (`#1E3C96` / `#2A4FC0`)**: Acciones primarias y botones interactivos.
@@ -22,7 +22,7 @@ Implementa el sistema estético **"Noche Tinta Studio"**:
 
 ¿Alguna vez notaste que tus videos de 24 o 30 cuadros por segundo se ven con tirones ("judder"), especialmente en paneos de cámara o escenas de acción rápida?
 
-**OmniFlow FPS Booster** es una herramienta especializada en **interpolación temporal de fotogramas**. Utiliza algoritmos de flujo óptico bidireccional para calcular el movimiento exacto de cada píxel entre dos cuadros sucesivos y sintetizar fotogramas intermedios enteramente nuevos.
+**OmniFlow FPS Booster** es una herramienta especializada en **interpolación temporal de fotogramas**. Implementa motores inteligentes de mezcla adaptativa con corte de escenas (*scene-cut detection*) y estimación de movimiento vectorial para sintetizar fotogramas intermedios de forma veloz, estable y sin los molestos artefactos de distorsión plástica (*warping*) típicos de los algoritmos lentos.
 
 El resultado es un video con una fluidez sedosa a **60 FPS** o **120 FPS**, ideal para:
 - Videos generados con herramientas de IA (Runway, Kling, Luma, Pika, Sora) que suelen renderizarse a 24 o 25 fps.
@@ -38,10 +38,11 @@ Todo funciona de forma **100% offline y local en tu equipo**, sin límites de ar
 ## ⚡ Características Principales y Algoritmos
 
 ### 1. Métodos de Interpolación Adaptativos
-- **Universal Adaptativo (Cine, Video Real, 3D — Recomendado)**: Algoritmo de flujo óptico avanzado con estimación de vectores por bloques cruzados. Es la opción predilecta para secuencias complejas, paneos de cámara y cinemáticas con múltiples elementos en movimiento simultáneo.
-- **Anime & Animación 2D (Cortes limpios y anti-morphing)**: La animación tradicional suele tener dibujos a "2s" o "3s" y fondos con paneos continuos. Este algoritmo evita la deformación o distorsión plástica en las líneas de entintado y reconoce cortes de plano inmediatos sin mezclar fotogramas.
-- **Motion Blend / Shutter Suave (Elimina tirones en paneos)**: Aplica una fusión temporal basada en ángulo de obturación (*shutter angle*) que suaviza los tirones en paneos rápidos de cámara sin inventar geometría extraña.
-- **Cadencia Pura / Pulldown Exacto**: Duplica y distribuye los fotogramas de forma matemáticamente exacta sin alterar un solo píxel del cuadro original.
+- **Universal Adaptativo (Cine, Video Real, 3D — Recomendado)**: Mezcla temporal adaptativa basada en `framerate` con detección inteligente de cortes de plano (umbral de cambio de escena al 8.2%). Es la opción predilecta por su altísima velocidad, estabilidad y ausencia total de deformaciones ("efecto gelatina").
+- **Anime & Animación 2D (Cortes limpios y anti-morphing)**: Diseñado para animación tradicional en "2s" o "3s". Aplica un umbral de corte de escena al 5.0% y rango de mezcla estricto para preservar las líneas de entintado sin mezclar fotogramas entre planos distintos.
+- **Motion Blend / Shutter Suave (Elimina tirones en paneos)**: Aplica una fusión temporal continua (`minterpolate` en modo `blend`) que emula el ángulo de obturación cinematográfico (*shutter angle*), suavizando paneos rápidos de cámara.
+- **Cadencia Pura / Pulldown Exacto**: Duplica y distribuye los fotogramas de forma matemáticamente exacta (`fps`) sin alterar un solo píxel del cuadro original.
+- **Estimación de Movimiento Vectorial (MCI / Flujo Óptico — Lento)**: Algoritmo avanzado de estimación de vectores de movimiento bidireccionales por bloques cruzados (`minterpolate` en modo `mci:bidir`). Reconstruye la trayectoria espacial de cada bloque entre cuadros (mayor demanda de tiempo de render).
 
 ### 2. Tasas de Fotogramas Destino
 - **60 FPS (Estándar recomendado — Ultra suave)**: El estándar universal para YouTube, Instagram Reels, TikTok y televisores modernos. Multiplica por 2 o por 2.5 la fluidez sin aumentar desmedidamente el peso del archivo.
@@ -79,7 +80,7 @@ No recorta, no agrega barras negras forzadas y no distorsiona el aspecto origina
 5. Seleccioná la calidad CRF deseada (por defecto CRF 18).
 6. Elegí tu acelerador por GPU o CPU.
 7. Presioná el botón **"Elevar FPS"**.
-8. Observá el progreso en tiempo real. Cuando termine, el video se guardará automáticamente con el sufijo `_60fps.mp4` (o `_120fps.mp4`) en la misma carpeta o en la que hayas definido.
+8. Observá el progreso en tiempo real. Cuando termine, el video se guardará automáticamente en la subcarpeta `Videos_60fps/` (o `Videos_120fps/`) con el sufijo `_60fps` o `_120fps` en contenedor `.mp4` con audio sincronizado intacto.
 
 ### Modo Procesamiento por Lote (Carpeta Completa)
 1. Pasá a la pestaña **"Carpeta Completa / Lote"**.
@@ -91,8 +92,8 @@ No recorta, no agrega barras negras forzadas y no distorsiona el aspecto origina
 
 ## 📁 Formatos Admitidos
 
-- **Entrada**: `.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.flv`, `.ts`, `.m4v`, `.mpg`, `.mpeg`.
-- **Salida**: `.mp4` H.264 o H.265 con audio sincronizado intacto.
+- **Entrada**: `.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.flv`, `.ts`, `.m4v`, `.mpg`, `.mpeg`, `.wmv`.
+- **Salida**: Contenedor `.mp4` optimizado (H.264 o H.265 / HEVC) o formato de origen compatible, con pista de audio copiada intacta (`-c:a copy`) garantizando sincronización labial absoluta.
 
 ---
 

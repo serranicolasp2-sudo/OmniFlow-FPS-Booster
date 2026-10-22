@@ -216,7 +216,8 @@ class FPSBoosterApp:
             "Universal Adaptativo (Cine, Video Real, 3D — Recomendado)",
             "Anime & Animación 2D (Cortes limpios y anti-morphing)",
             "Motion Blend / Shutter Suave (Elimina tirones y judder en paneos)",
-            "Cadencia Pura / Pulldown Exacto (Duplicación matemática sin modificar imagen)"
+            "Cadencia Pura / Pulldown Exacto (Duplicación matemática sin modificar imagen)",
+            "Estimación de Movimiento Vectorial (MCI / Flujo Óptico — Lento)"
         )
         method_cb.grid(row=2, column=1, sticky="ew", pady=4)
 
@@ -284,13 +285,17 @@ class FPSBoosterApp:
     def _browse_single_input(self):
         f = filedialog.askopenfilename(
             title="Seleccionar Video",
-            filetypes=[("Archivos de Video", "*.mp4;*.mov;*.mkv;*.avi;*.webm"), ("Todos los archivos", "*.*")]
+            filetypes=[
+                ("Archivos de Video", "*.mp4;*.mov;*.mkv;*.avi;*.webm;*.flv;*.ts;*.m4v;*.mpg;*.mpeg;*.wmv"),
+                ("Todos los archivos", "*.*")
+            ]
         )
         if f:
             self.single_input_var.set(os.path.normpath(f))
             p = Path(f)
             target_fps = self._get_target_fps()
-            out_name = f"{p.stem}_{target_fps}fps{p.suffix}"
+            ext = p.suffix if p.suffix.lower() in [".mp4", ".mov", ".mkv", ".webm"] else ".mp4"
+            out_name = f"{p.stem}_{target_fps}fps{ext}"
             out_path = p.parent / f"Videos_{target_fps}fps" / out_name
             self.single_out_var.set(os.path.normpath(str(out_path)))
 
@@ -406,7 +411,8 @@ class FPSBoosterApp:
             r_fps = data.get("r_frame_rate", "24/1")
             if "/" in r_fps:
                 num, den = r_fps.split("/")
-                fps_val = round(float(num) / float(den), 2)
+                den_f = float(den)
+                fps_val = round(float(num) / den_f, 2) if den_f != 0 else 24.0
             else:
                 fps_val = round(float(r_fps), 2)
 
@@ -430,6 +436,8 @@ class FPSBoosterApp:
             return f"framerate=fps={target_fps}:interp_start=5:interp_end=250:scene=5.0"
         elif "Motion Blend" in method_str:
             return f"minterpolate=fps={target_fps}:mi_mode=blend"
+        elif "Vectorial" in method_str or "MCI" in method_str or "Flujo" in method_str:
+            return f"minterpolate=fps={target_fps}:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1"
         elif "Cadencia Pura" in method_str:
             return f"fps={target_fps}"
         else:
@@ -523,7 +531,7 @@ class FPSBoosterApp:
         t.start()
 
     def _find_batch_videos(self, in_dir, out_dir, recursive, target_fps=60):
-        exts = {".mp4", ".mov", ".mkv", ".avi", ".webm"}
+        exts = {".mp4", ".mov", ".mkv", ".avi", ".webm", ".flv", ".ts", ".m4v", ".mpg", ".mpeg", ".wmv"}
         targets = []
         in_path = Path(in_dir)
 
@@ -534,7 +542,8 @@ class FPSBoosterApp:
                 if f"videos_{target_fps}fps" in str(p).lower() or f"_{target_fps}fps" in p.name.lower():
                     continue
                 rel = p.relative_to(in_path)
-                dest = Path(out_dir) / rel.parent / f"{p.stem}_{target_fps}fps{p.suffix}"
+                ext = p.suffix if p.suffix.lower() in [".mp4", ".mov", ".mkv", ".webm"] else ".mp4"
+                dest = Path(out_dir) / rel.parent / f"{p.stem}_{target_fps}fps{ext}"
                 targets.append((str(p), str(dest)))
 
         return targets
